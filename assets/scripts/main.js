@@ -4,13 +4,28 @@
 window.addEventListener("DOMContentLoaded", init);
 
 // Starts the program, all function calls trace back here
-function init() {
+async function init() {
 	// Get the recipes from localStorage
 	let recipes = getRecipesFromStorage();
+	// If localStorage is empty, load starter recipes from recipes.json
+	if (recipes.length === 0) {
+		recipes = await getRecipesFromJSON();
+		saveRecipesToStorage(recipes);
+	}
 	// Add each recipe to the <main> element
 	addRecipesToDocument(recipes);
 	// Add the event listeners to the form elements
 	initFormHandler();
+}
+
+/**
+ * Fetches starter recipes from reference/recipes.json
+ * @returns {Promise<Array<Object>>} An array of recipes from JSON
+ */
+async function getRecipesFromJSON() {
+	const response = await fetch('./reference/recipes.json');
+	if (!response.ok) return [];
+	return await response.json();
 }
 
 /**
@@ -24,6 +39,8 @@ function getRecipesFromStorage() {
 	// A9. TODO - Complete the functionality as described in this function
 	//           header. It is possible in only a single line, but should
 	//           be no more than a few lines.
+	const recipes = localStorage.getItem('recipes');
+	return recipes ? JSON.parse(recipes) : [];
 }
 
 /**
@@ -35,10 +52,16 @@ function getRecipesFromStorage() {
  */
 function addRecipesToDocument(recipes) {
 	// A10. TODO - Get a reference to the <main> element
+	const main = document.querySelector('main');
 	// A11. TODO - Loop through each of the recipes in the passed in array,
 	//            create a <recipe-card> element for each one, and populate
 	//            each <recipe-card> with that recipe data using element.data = ...
 	//            Append each element to <main>
+	recipes.forEach(recipe => {
+		const recipeCard = document.createElement('recipe-card');
+		recipeCard.data = recipe;
+		main.appendChild(recipeCard);
+	});
 }
 
 /**
@@ -51,6 +74,7 @@ function saveRecipesToStorage(recipes) {
 	// B1. TODO - Complete the functionality as described in this function
 	//            header. It is possible in only a single line, but should
 	//            be no more than a few lines.
+	localStorage.setItem('recipes', JSON.stringify(recipes));
 }
 
 /**
